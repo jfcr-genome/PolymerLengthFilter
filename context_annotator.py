@@ -57,7 +57,7 @@ class AnnotatedVariant(VariantLike):
             annotation_length = 0
 
         self.mut_len = mut_len
-        self_annot_len = annotation_length
+        self.annot_len = annotation_length
         self.annot_type = annotation_type
         annotation_length = min(annotation_length, 5)
         mut_len = min(mut_len, 5)
