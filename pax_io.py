@@ -18,8 +18,10 @@ class PaxVariant(VariantLike) :
         self.alt   = items['Alt']
         if self.ref == '-' :
             self.mut_type = 'Ins'
+            self.mut_length = len(self.alt)
         elif self.alt == '-' :
             self.mut_type = 'Del'
+            self.mut_length = len(self.ref)
         else :
             raise ValueError(f'Invalid mutation type ref: {self.ref}, alt: {self.alt}')
         self._variant_information = items
