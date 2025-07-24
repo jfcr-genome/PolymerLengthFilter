@@ -29,6 +29,62 @@ class PaxVariant(VariantLike) :
     @property
     def variant_information(self) -> dict :
         return self._variant_information
+    
+    def _calc_mutect2_vaf(self, sample_info) -> dict :
+        allelic_depth = [int(x) for x in sample_info['AD'].split(',')]
+        alt_depth = sum(allelic_depth[1:])
+        ref_depth = allelic_depth[0]
+        total_depth = int(sample_info['DP'])
+        vaf = float(alt_depth) / float(total_depth)
+        return {'ref_reads':   ref_depth, 
+                'alt_reads':   alt_depth,
+                'total_reads': total_depth,
+                'vaf':         vaf}
+    
+    def _calc_strelka2_vaf(self, sample_info) -> dict :
+        tir_list = [int(x) for x in sample_info['TIR'].split(',')]
+        tar_list = [int(x) for x in sample_info['TAR'].split(',')]
+        alt_depth = tir_list[0]
+        ref_depth = tar_list[0]
+        total_depth = ref_depth + alt_depth
+        vaf = float(alt_depth) / float(total_depth)
+        return {'ref_reads':   ref_depth, 
+                'alt_reads':   alt_depth,
+                'total_reads': total_depth,
+                'vaf':         vaf}
+
+    def calc_vaf(self) :
+        if self.variant_information['mutect2.FORMAT'] != 'NA' :
+            format_header =    self.variant_information['mutect2.FORMAT'].split(':')
+            normal_info_list = self.variant_information['mutect2.NORMAL'].split(':')
+            tumor_info_list  = self.variant_information['mutect2.TUMOR'].split(':')
+            assert(len(format_header) == len(normal_info_list))
+            assert(len(format_header) == len(tumor_info_list))
+            normal_info = {format_header[i]: normal_info_list[i] for i in range(len(format_header))}
+            tumor_info  = {format_header[i]: tumor_info_list[i]  for i in range(len(format_header))}
+            normal_reads_info = self._calc_mutect2_vaf(normal_info)
+            for k, v in normal_reads_info.items() :
+                self._variant_information['normal_' + k] = v
+            tumor_reads_info  = self._calc_mutect2_vaf(tumor_info)
+            for k, v in tumor_reads_info.items() :
+                self._variant_information['tumor_' + k] = v
+        elif self.variant_information['strelka2.FORMAT'] != 'NA' :
+            format_header =    self.variant_information['strelka2.FORMAT'].split(':')
+            normal_info_list = self.variant_information['strelka2.NORMAL'].split(':')
+            tumor_info_list  = self.variant_information['strelka2.TUMOR'].split(':')
+            assert(len(format_header) == len(normal_info_list))
+            assert(len(format_header) == len(tumor_info_list))
+            normal_info = {format_header[i]: normal_info_list[i] for i in range(len(format_header))}
+            tumor_info  = {format_header[i]: tumor_info_list[i]  for i in range(len(format_header))}
+            normal_reads_info = self._calc_strelka2_vaf(normal_info)
+            for k, v in normal_reads_info.items() :
+                self._variant_information['normal_' + k] = v
+            tumor_reads_info  = self._calc_strelka2_vaf(tumor_info)
+            for k, v in tumor_reads_info.items() :
+                self._variant_information['tumor_' + k] = v
+        else :
+            sys.exit("No Mutect2 or Strelka2 Information")
+        return
 
 class PaxReader :
     essential_colnames = ['Chr', 'Start', 'End', 'Ref', 'Alt']
