@@ -4,6 +4,24 @@ import reference_reader
 from pax_io import VariantLike, PaxVariant
 
 class AnnotatedVariant(VariantLike): 
+    """
+    Represents a genomic variant with sequence context annotation
+
+    This class stores the repeat length and microhomology length calculated from the reference 
+    genome sequence aroud the variant, as well as the variant class assigned based on these features.
+
+    Attributes:
+        chrom (str) : Chromosome name
+        start (int) : Start position of the variant (1-based)
+        end (int)   : End position of the variant
+        ref (str)   : Reference allele
+        alt (str)   : Alternative allele
+        variant (PaxVariant) : Variant information loaded from Pax result file.
+        annotation (dict) : Repeat length and microhomology information annotated by ContextAnnotator
+        label (str) : Variant class assigned based on repeat, microhomology, and variant length.
+
+    
+    """
     def __init__(self, variant: PaxVariant, annotation: dict) :
         self.chrom = variant.chrom
         self.start = variant.start
