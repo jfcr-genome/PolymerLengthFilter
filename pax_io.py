@@ -35,7 +35,10 @@ class PaxVariant(VariantLike) :
         alt_depth = sum(allelic_depth[1:])
         ref_depth = allelic_depth[0]
         total_depth = int(sample_info['DP'])
-        vaf = float(alt_depth) / float(total_depth)
+        if total_depth == 0 :
+            vaf = None
+        else :
+            vaf = float(alt_depth) / float(total_depth)
         return {'ref_reads':   ref_depth, 
                 'alt_reads':   alt_depth,
                 'total_reads': total_depth,
@@ -47,7 +50,10 @@ class PaxVariant(VariantLike) :
         alt_depth = tir_list[0]
         ref_depth = tar_list[0]
         total_depth = ref_depth + alt_depth
-        vaf = float(alt_depth) / float(total_depth)
+        if total_depth == 0 :
+            vaf = None
+        else :
+            vaf = float(alt_depth) / float(total_depth)
         return {'ref_reads':   ref_depth, 
                 'alt_reads':   alt_depth,
                 'total_reads': total_depth,
